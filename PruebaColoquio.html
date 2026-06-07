@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Docente · Coloquio · Natalia Farini</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0e1a 0%, #0c0f17 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', 'Fira Code', 'Cascadia Code', monospace;
+            padding: 20px;
+        }
+
+        .terminal {
+            width: 1100px;
+            max-width: 90vw;
+            height: 85vh;
+            min-height: 600px;
+            background: #0a0c12;
+            border-radius: 16px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(66, 220, 180, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .terminal-bar {
+            background: #11131c;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #1e2a3a;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red {
+            background: #ff5f56;
+        }
+
+        .dot.yellow {
+            background: #ffbd2e;
+        }
+
+        .dot.green {
+            background: #27c93f;
+        }
+
+        .terminal-title {
+            color: #5b6e8c;
+            font-size: 0.85rem;
+            margin-left: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .terminal-title span {
+            color: #3ecf8e;
+        }
+
+        .terminal-screen {
+            flex: 1;
+            padding: 24px 28px;
+            overflow-y: auto;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: #cbd5e6;
+            background: #0a0c12;
+            scroll-behavior: smooth;
+        }
+
+        .prompt {
+            color: #3ecf8e;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .command-line {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            margin: 6px 0;
+        }
+
+        .command {
+            color: #f0f3f8;
+            font-weight: 500;
+        }
+
+        .output {
+            margin: 8px 0 16px 18px;
+            padding-left: 12px;
+            border-left: 2px solid #2a3a4a;
+            color: #b7c5d9;
+        }
+
+        .output p {
+            margin: 6px 0;
+        }
+
+        .code-box {
+            background: #0e121c;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-family: inherit;
+            margin: 10px 0;
+            border: 1px solid #1f2a36;
+            color: #e2e8f0;
+        }
+
+        .highlight {
+            color: #f5a97f;
+            font-weight: bold;
+        }
+
+        .warning {
+            color: #f5b041;
+        }
+
+        .success {
+            color: #8bdd6e;
+        }
+
+        /* Estilos del reproductor y la barra minimalista */
+        .audio-player {
+            background: #0a0e18;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid #2a3a4a;
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .audio-player button {
+            background: #1e2a3a;
+            border: none;
+            color: #3ecf8e;
+            padding: 6px 14px;
+            border-radius: 24px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .audio-player button:hover {
+            background: #2a3a4a;
+            transform: scale(1.02);
+        }
+
+        .audio-status {
+            font-size: 0.85rem;
+            color: #6a8aaa;
+        }
+
+        /* Contenedor de la barra de progreso */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: #1e2a3a;
+            border-radius: 2px;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Barra que se va llenando */
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #3ecf8e;
+            transition: width 0.1s linear;
+            border-radius: 2px;
+        }
+
+        hr {
+            border-color: #1f2a36;
+            margin: 18px 0;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .input-area input {
+            background: #0e121c;
+            border: 1px solid #2a3a4a;
+            color: #3ecf8e;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            padding: 8px 12px;
+            border-radius: 28px;
+            flex: 1;
+            outline: none;
+        }
+
+        .input-area input:focus {
+            border-color: #3ecf8e;
+        }
+
+        button.send-btn {
+            background: #1e2a3a;
+            border: none;
+            color: #cbd5e6;
+            padding: 8px 18px;
+            border-radius: 28px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button.send-btn:hover {
+            background: #2a3a4a;
+            color: #3ecf8e;
+        }
+
+        .footer-note {
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 12px;
+            border-top: 1px solid #1e2a3a;
+            color: #4a5b77;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0e121c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a3f55;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="terminal">
+        <div class="terminal-bar">
+            <div class="terminal-dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="terminal-title">
+                docente@coloquio:~/<span>entrevista_natalia</span>
+            </div>
+        </div>
+
+        <div class="terminal-screen" id="terminalScreen">
+        </div>
+
+        <div class="footer-note">
+            🔊 Cada comando ejecuta el audio real de Natalia · Escribí <span style="color:#3ecf8e">help</span> para
+            comenzar
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // TERMINAL DOCENTE CON AUDIO INTEGRADO
+        // ============================================
+
+        let history = [];
+        let currentAudio = null;
+        let activeAudioId = null;
+
+        const screen = document.getElementById("terminalScreen");
+
+        // Reproductor global con actualización de la barra de estado
+        function playAudio(audioFile, cmdId) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+
+            activeAudioId = cmdId;
+            const audioPath = `audios/${audioFile}`;
+            currentAudio = new Audio(audioPath);
+
+            // Escuchamos el evento de actualización de tiempo
+            currentAudio.addEventListener('timeupdate', () => {
+                const bar = document.getElementById(`progress_${activeAudioId}`);
+                if (bar && currentAudio.duration) {
+                    const percent = (currentAudio.currentTime / currentAudio.duration) * 100;
+                    bar.style.width = percent + '%';
+                }
+            });
+
+            // Cuando termina el audio, la barra queda al 100%
+            currentAudio.addEventListener('ended', () => {
+                const bar = document.getElementById(`progress_${activeAudioId}`);
+                if (bar) bar.style.width = '100%';
+            });
+
+            currentAudio.play().catch(error => {
+                console.warn(`⚠️ No se pudo reproducir ${audioFile}:`, error);
+            });
+        }
+
+        // Control manual para el botón de Pausar/Reproducir
+        function toggleAudio() {
+            if (currentAudio) {
+                if (currentAudio.paused) {
+                    currentAudio.play();
+                } else {
+                    currentAudio.pause();
+                }
+            }
+        }
+
+        // Función para saltar a un punto específico del audio al hacer clic en la barra
+        function seekAudio(event, cmdId) {
+            // Solo permitimos buscar en el audio si es el que está activo actualmente
+            if (!currentAudio || activeAudioId !== cmdId) return;
+
+            const container = event.currentTarget;
+            const clickX = event.offsetX;
+            const width = container.clientWidth;
+            const percent = clickX / width;
+
+            currentAudio.currentTime = percent * currentAudio.duration;
+        }
+
+        const commands = {
+            help: {
+                exec: (id) => ({
+                    html: `
+                    <div class="code-box">
+                        📟 <span class="highlight">COMANDOS DISPONIBLES</span><br><br>
+                        > <span class="success">quien_soy</span>   -  Presentación de Natalia + 🎧<br>
+                        > <span class="success">casualidad</span>  -  Cómo llegó a la docencia + 🎧<br>
+                        > <span class="success">abp</span>         -  Aprendizaje Basado en Proyectos + 🎧<br>
+                        > <span class="success">ia</span>          -  Inteligencia Artificial + 🎧<br>
+                        > <span class="success">huella</span>      -  Huella digital + alfabetización + 🎧<br>
+                        > <span class="success">aula</span>        -  Aulas heterogéneas + multiplicidad + 🎧<br>
+                        > <span class="success">autoridad</span>   -  Construcción de autoridad + equipo + 🎧<br>
+                        > <span class="success">consejo</span>     -  Mensaje para futuros docentes + 🎧<br>
+                        > <span class="success">autores</span>     -  Dependencias teóricas del análisis<br>
+                        > <span class="success">creditos</span>    -  Fuentes y autoría<br>
+                        > <span class="success">clear</span>       -  Limpiar pantalla<br>
+                    </div>
+                    `
+                })
+            },
+            quien_soy: {
+                exec: (id) => {
+                    playAudio("01_quien_soy.mp3", id);
+                    return {
+                        html: `
+                        <div class="code-box">
+                            👩‍🏫 <span class="highlight">Natalia Farini</span><br>
+                            ▸ Analista de Sistemas y Profesora en Informática.<br>
+                            ▸ Diplomatura en Ciencia de Datos e IA.<br>
+                            ▸ Preceptora y docente de programación.<br>
+                            <div class="audio-player">
+                                <div class="audio-controls">
+                                    <span>🔊</span>
+                                    <button onclick="toggleAudio()">▶ Pausar / Reproducir</button>
+                                    <span class="audio-status">🎧 Natalia habla sobre su formación</span>
+                                </div>
+                                <div class="progress-container" onclick="seekAudio(event, '${id}')">
+                                    <div class="progress-bar" id="progress_${id}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                    };
+                }
+            },
+            casualidad: {
+                exec: (id) => {
+                    playAudio("02_casualidad.mp3", id);
+                    return {
+                        html: `
+                        <div class="code-box">
+                            🧡 <span class="highlight">"La hermosa casualidad de enseñar"</span><br>
+                            ▸ Llegó de rebote: ingeniería → profesor particular → suplencias.<br>
+                            ▸ Al entrar al aula: <span class="success">"me sentí como pez en el agua"</span>.<br>
+                            ▸ No fue una elección inicial, fue una <span class="highlight">construcción</span>.<br>
+                            <div class="audio-player">
+                                <div class="audio-controls">
+                                    <span>🔊</span>
+                                    <button onclick="toggleAudio()">▶ Pausar / Reproducir</button>
+                                    <span class="audio-status">🎧 "Llegué a la docencia un poco por casualidad..."</span>
+                                </div>
+                                <div class="progress-container" onclick="seekAudio(event, '${id}')">
+                                    <div class="progress-bar" id="progress_${id}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                    };
+                }
+            },
+            abp: {
+                exec: (id) => {
+                    playAudio("03_abp.mp3", id);
+                    return {
+                        html: `
+                        <div class="code-box">
+                            📚 <span class="highlight">APRENDIZAJE BASADO EN PROYECTOS (ABP)</span><br>
+                            ────────────────────────────────────────<br>
+                            ▸ <span class="warning">YA NO</span> es "profe habla, alumno escucha".<br>
+                            ▸ Formato: Clase Taller sustituye a la clase magistral tradicional.<br>
+                            ▸ Se propone un proyecto y se guía al estudiante para mayor dinamismo.<br>
+                            🔥 <span class="success">[Teoría] Maggio:</span> La enseñanza poderosa rediseña la clase en tiempo presente.<br>
+                            <div class="audio-player">
+                                <div class="audio-controls">
+                                    <span>🔊</span>
+                                    <button onclick="toggleAudio()">▶ Pausar / Reproducir</button>
+                                    <span class="audio-status">🎧 "Hoy las clases se dan a partir de ABP..."</span>
+                                </div>
+                                <div class="progress-container" onclick="seekAudio(event, '${id}')">
+                                    <div class="progress-bar" id="progress_${id}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                    };
+                }
+            },
+            ia: {
+                exec: (id) => {
+                    playAudio("04_ia.mp3", id);
+                    return {
+                        html: `
+                        <div class="code-box">
+                            🤖 <span class="highlight">INTELIGENCIA ARTIFICIAL</span><br>
+                            ▸ El desafío más grande hoy es la IA.<br>
+                            ▸ Muchos la usan como <span class="warning">"salvataje"</span>, no como herramienta.<br>
+                            ▸ Hay que aprender a usarla y enseñarla de forma crítica.<br>
+                            ▸ Estado de regulación: Pendiente / En desarrollo en el sistema educativo.<br>
+                            <div class="audio-player">
+                                <div class="audio-controls">
+                                    <span>🔊</span>
+                                    <button onclick="toggleAudio()">▶ Pausar / Reproducir</button>
+                                    <span class="audio-status">🎧 "El desafío más grande es la inteligencia artificial..."</span>
+                                </div>
+                                <div class="progress-container" onclick="seekAudio(event, '${id}')">
+                                    <div class="progress-bar" id="progress_${id}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                    };
+                }
+            },
+            huella: {
+                exec: (id) => {
+                    playAudio("05_huella.mp3", id);
+                    return {
+                        html: `
+                        <div class="code-box">
+                            👣 <span class="highlight">HUELLA DIGITAL + ALFABETIZACIÓN</span><br>
+                            ▸ Cada click y cada foto <span class="warning">deja una huella inborrable</span>.<br>
+                            ▸ Falta concientización sobre la privacidad de datos.<br>
+                            🔥 <span class="success">[Teoría] Kozak:</span> Necesidad de una alfabetización mediática crítica.<br>
+                            <div class="audio-player">
+                                <div class="audio-controls">
+                                    <span>🔊</span>
+                                    <button onclick="toggleAudio()">▶ Pausar / Reproducir</button>
+                                    <span class="audio-status">🎧 "Cada click, cada foto... es una huella digital"</span>
+                                </div>
+                                <div class="progress-container" onclick="seekAudio(event, '${id}')">
+                                    <div class="progress-bar" id="progress_${id}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                    };
+                }
+            },
+            aula: {
+                exec: (id) => {
+                    playAudio("06_aula.mp3", id);
+                    return {
+                        html: `
+                        <div class="code-box">
+                            🏫 <span class="highlight">AULAS HETEROGÉNEAS Y MULTIPLICIDAD</span><br>
+                            ▸ Desafíos de infraestructura: Superpoblación (30-45 alumnos) y "profesores taxi".<br>
+                            ▸ El docente es: psicólogo, concientizador, mediador, plan B constante.<br>
+                            🔥 <span class="success">[Teoría] Esteve:</span> La acumulación de roles genera malestar docente.<br>
+                            <div class="audio-player">
+                                <div class="audio-controls">
+                                    <span>🔊</span>
+                                    <button onclick="toggleAudio()">▶ Pausar / Reproducir</button>
+                                    <span class="audio-status">🎧 "El docente tiene multiplicidad de roles..."</span>
+                                </div>
+                                <div class="progress-container" onclick="seekAudio(event, '${id}')">
+                                    <div class="progress-bar" id="progress_${id}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                    };
+                }
+            },
+            autoridad: {
+                exec: (id) => {
+                    playAudio("07_autoridad.mp3", id);
+                    return {
+                        html: `
+                        <div class="code-box">
+                            🤝 <span class="highlight">CONSTRUIR AUTORIDAD + EQUIPO</span><br>
+                            ▸ No somos enemigos, tampoco amigos.<br>
+                            ▸ Evaluación: Co-construcción de criterios democráticos.<br>
+                            ▸ Clave: vínculo de confianza sin perder el límite pedagógico.<br>
+                            🔥 <span class="success">[Teoría] Greco:</span> La autoridad se construye desde el reconocimiento mutuo.<br>
+                            <div class="audio-player">
+                                <div class="audio-controls">
+                                    <span>🔊</span>
+                                    <button onclick="toggleAudio()">▶ Pausar / Reproducir</button>
+                                    <span class="audio-status">🎧 "Trato de hacer un equipo... yo propongo, ellos proponen"</span>
+                                </div>
+                                <div class="progress-container" onclick="seekAudio(event, '${id}')">
+                                    <div class="progress-bar" id="progress_${id}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                    };
+                }
+            },
+            consejo: {
+                exec: (id) => {
+                    playAudio("08_consejo.mp3", id);
+                    return {
+                        html: `
+                        <div class="code-box">
+                            🎁 <span class="highlight">CONSEJO PARA FUTUROS DOCENTES</span><br>
+                            ─────────────────────────────────────────────────<br>
+                            ✔️ <span class="success">No hay receta</span> – cada grupo es un repositorio distinto.<br>
+                            ✔️ Construir vínculo sin confundir con amistad.<br>
+                            ✔️ <span class="success">Capacitación constante</span> ante las mutaciones escolares.<br>
+                            <div class="audio-player">
+                                <div class="audio-controls">
+                                    <span>🔊</span>
+                                    <button onclick="toggleAudio()">▶ Pausar / Reproducir</button>
+                                    <span class="audio-status">🎧 "El cuadernito te lo armás vos..."</span>
+                                </div>
+                                <div class="progress-container" onclick="seekAudio(event, '${id}')">
+                                    <div class="progress-bar" id="progress_${id}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                    };
+                }
+            },
+            autores: {
+                exec: (id) => ({
+                    html: `
+                    <div class="code-box">
+                        📚 <span class="highlight">DEPENDENCIAS TEÓRICAS CONFIGURADAS (Package.json)</span><br>
+                        ─────────────────────────────────────────────────────────────<br>
+                        📦 <span class="success">maggio-enseñanza-poderosa</span> : ^2.0 (Diseño didáctico e inclusión de IA)<br>
+                        📦 <span class="success">esteve-malestar-docente</span>   : ^1.5 (Multiplicidad de roles y contexto real)<br>
+                        📦 <span class="success">greco-autoridad-pedagogica</span>: ^3.1 (Vínculo horizontal y límites democráticos)<br>
+                        📦 <span class="success">kozak-alfabetizacion</span>      : ^1.0 (Huella digital y ciudadanía digital)<br>
+                        ─────────────────────────────────────────────────────────────<br>
+                        💡 <span class="warning">Tip:</span> Ejecutá los comandos temáticos para ver estas dependencias en acción.
+                    </div>
+                    `
+                })
+            },
+            creditos: {
+                exec: (id) => ({
+                    html: `
+                    <div class="code-box">
+                        📀 <span class="highlight">Acerca de esta Terminal</span><br>
+                        ▸ Entrevistada: Prof. Natalia Farini.<br>
+                        ▸ Desarrollo y Análisis: Agustín Domínguez.<br>
+                        ▸ Cátedra: Taller de Problematización Docente - UNRC.<br>
+                    </div>
+                    `
+                })
+            },
+            clear: {
+                exec: (id) => ({ html: "__CLEAR__" })
+            }
+        };
+
+        function renderScreen() {
+            if (!screen) return;
+            let html = `<div style="margin-bottom: 16px;">================================================<br>
+<span style="color:#3ecf8e;">    DOCENTE TERMINAL v2.0</span><br>
+    <span style="color:#f5a97f;">"La docencia como construcción"</span><br>
+    Basado en entrevista a Natalia Farini<br>
+================================================<br><br></div>`;
+
+            for (let entry of history) {
+                if (entry.type === "command") {
+                    html += `<div class="command-line"><span class="prompt">$></span> <span class="command">${escapeHtml(entry.cmd)}</span></div>`;
+                } else if (entry.type === "output") {
+                    if (entry.content === "__CLEAR__") continue;
+                    html += `<div class="output">${entry.content}</div>`;
+                }
+            }
+            html += `<div class="input-area" id="inputArea">
+                    <span class="prompt">$></span>
+                    <input type="text" id="terminalInput" placeholder="escribí un comando (help para ver lista)" autofocus>
+                    <button class="send-btn" id="sendBtn">⏎ ejecutar</button>
+                  </div>`;
+            screen.innerHTML = html;
+
+            const inputElem = document.getElementById("terminalInput");
+            const sendBtn = document.getElementById("sendBtn");
+            if (inputElem) {
+                inputElem.focus();
+                inputElem.addEventListener("keypress", (e) => {
+                    if (e.key === "Enter") executeCommand(inputElem.value);
+                });
+            }
+            if (sendBtn) sendBtn.onclick = () => executeCommand(inputElem.value);
+            screen.scrollTop = screen.scrollHeight;
+        }
+
+        function executeCommand(cmdText) {
+            if (!cmdText || cmdText.trim() === "") return;
+            const cmd = cmdText.trim().toLowerCase();
+            history.push({ type: "command", cmd: cmdText });
+
+            let outputHtml = "";
+            if (commands[cmd]) {
+                // Generamos un ID único para este comando
+                const cmdId = "cmd_" + Date.now();
+                const result = commands[cmd].exec(cmdId);
+
+                if (result.html === "__CLEAR__") {
+                    history = [];
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio = null;
+                    }
+                    renderScreen();
+                    return;
+                }
+                outputHtml = result.html;
+            } else {
+                outputHtml = `<div class="code-box"><span class="warning">❌ Comando no reconocido:</span> '${escapeHtml(cmd)}'<br>Escribí <span class="success">help</span> para ver comandos disponibles.</div>`;
+            }
+            history.push({ type: "output", content: outputHtml });
+            renderScreen();
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // Inicializar con help automático
+        history.push({ type: "output", content: `<div class="code-box">✨ Bienvenide a la Terminal Docente. Escribí <span class="success">help</span> para ver todos los comandos.<br>🎧 Cada comando ejecuta automáticamente el audio original de la entrevista.</div>` });
+        renderScreen();
+    </script>
+</body>
+
+</html>
